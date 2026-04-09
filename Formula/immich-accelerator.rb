@@ -1,8 +1,8 @@
 class ImmichAccelerator < Formula
   desc "Run Immich compute natively on Apple Silicon"
   homepage "https://github.com/epheterson/immich-apple-silicon"
-  url "https://github.com/epheterson/immich-apple-silicon/archive/refs/tags/v1.3.9.tar.gz"
-  sha256 "675a6ded694eb2519ac00f634b4cbe68d2ca4a507bb21e68eeff9e2055773d2c"
+  url "https://github.com/epheterson/immich-apple-silicon/archive/refs/tags/v1.4.0.tar.gz"
+  sha256 "d6c87ed02382d92323e4ea0c049336b4389c41b4f0db671757fc61eabb8767de"
   license "MIT"
 
   resource "ml" do
@@ -14,6 +14,7 @@ class ImmichAccelerator < Formula
   depends_on arch: :arm64
   depends_on "node"
   depends_on "vips"
+  depends_on "libpq"
   depends_on "python@3.11"
 
   def install
