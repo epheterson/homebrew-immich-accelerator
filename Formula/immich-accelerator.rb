@@ -1,8 +1,8 @@
 class ImmichAccelerator < Formula
   desc "Run Immich compute natively on Apple Silicon"
   homepage "https://github.com/epheterson/immich-apple-silicon"
-  url "https://github.com/epheterson/immich-apple-silicon/archive/refs/tags/v1.4.3.tar.gz"
-  sha256 "cd70ffaf4d0b660ea80b15c397c78746b96717fb7642d49b0acde217c8ca4331"
+  url "https://github.com/epheterson/immich-apple-silicon/archive/refs/tags/v1.4.4.tar.gz"
+  sha256 "34688d45e681233651788d91b71d7344984be90f51f1c5a6c90254daf4c89863"
   license "MIT"
 
   resource "ml" do
@@ -12,7 +12,13 @@ class ImmichAccelerator < Formula
 
   depends_on :macos
   depends_on arch: :arm64
-  depends_on "node"
+  # Immich 2.7.x pins engines.node = 24.x and sharp@0.34.5
+  # native addons break on node 25 (brew's default 
+  # formula). node@22 is the closest LTS with an arm64
+  # bottle that satisfies Immich's range. Pin explicitly —
+  # the accelerator's find_node() looks under
+  # /opt/homebrew/opt/node@22/bin/node.
+  depends_on "node@22"
   depends_on "vips"
   depends_on "libpq"
   depends_on "python@3.11"
