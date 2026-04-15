@@ -1,8 +1,8 @@
 class ImmichAccelerator < Formula
   desc "Run Immich compute natively on Apple Silicon"
   homepage "https://github.com/epheterson/immich-apple-silicon"
-  url "https://github.com/epheterson/immich-apple-silicon/archive/refs/tags/v1.4.4.tar.gz"
-  sha256 "34688d45e681233651788d91b71d7344984be90f51f1c5a6c90254daf4c89863"
+  url "https://github.com/epheterson/immich-apple-silicon/archive/refs/tags/v1.4.5.tar.gz"
+  sha256 "abde7dd3b6f5473923d8ebe1cd94040a34085192e1fafe1631c29064fc3c8843"
   license "MIT"
 
   resource "ml" do
@@ -22,6 +22,14 @@ class ImmichAccelerator < Formula
   depends_on "vips"
   depends_on "libpq"
   depends_on "python@3.11"
+  # GNU gzip for ‹. Apple's BSD gzip
+  # doesn't support that flag, and Immich's database-
+  # backup service pipes pg_dump stdout through it. Without
+  # GNU gzip the pg_dump_shim falls back to stripping
+  # --rsyncable (output is valid but loses rsync-friendly
+  # block boundaries) â€” installing it is the honest
+  # default that matches upstream Immich's behavior.
+  depends_on "gzip"
 
   def install
     libexec.install Dir["*"]
