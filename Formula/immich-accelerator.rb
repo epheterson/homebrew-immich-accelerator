@@ -1,13 +1,13 @@
 class ImmichAccelerator < Formula
   desc "Run Immich compute natively on Apple Silicon"
   homepage "https://github.com/epheterson/immich-apple-silicon"
-  url "https://github.com/epheterson/immich-apple-silicon/archive/refs/tags/v1.4.2.tar.gz"
-  sha256 "043955ef44d9cfde47a86b24e8ce9e3ac5357616e3b790818f9b61bf1a4755cd"
+  url "https://github.com/epheterson/immich-apple-silicon/archive/refs/tags/v1.4.3.tar.gz"
+  sha256 "cd70ffaf4d0b660ea80b15c397c78746b96717fb7642d49b0acde217c8ca4331"
   license "MIT"
 
   resource "ml" do
-    url "https://github.com/epheterson/immich-ml-metal/archive/9561a6d5dded7a06f0e3c780b5693c328c6fd7c7.tar.gz"
-    sha256 "b55cde836638bb7339c80242e743e611271872e9add4c41f1263c74f0255821b"
+    url "https://github.com/epheterson/immich-ml-metal/archive/5ec33c4f221db78483daaa5b7c9e2cdfd640a62f.tar.gz"
+    sha256 "090b5e51a55f40ad56eb1a79cadb40b2d34264e7ba495bca9620631df48a64d0"
   end
 
   depends_on :macos
