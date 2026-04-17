@@ -1,8 +1,8 @@
 class ImmichAccelerator < Formula
   desc "Run Immich compute natively on Apple Silicon"
   homepage "https://github.com/epheterson/immich-apple-silicon"
-  url "https://github.com/epheterson/immich-apple-silicon/archive/refs/tags/v1.4.6.tar.gz"
-  sha256 "70b43fe0293c40e7abd178155bfc4d7ba0e208dd02b1b0510665396cb1fecabf"
+  url "https://github.com/epheterson/immich-apple-silicon/archive/refs/tags/v1.4.7.tar.gz"
+  sha256 "6e7ad322bf3a8520fb6b9e2800d19201eebfd34d734d6f1dad3cac205a271d76"
   license "MIT"
 
   resource "ml" do
@@ -30,8 +30,11 @@ class ImmichAccelerator < Formula
     resource("ml").stage do
       (libexec/"ml").install Dir["*"]
     end
-    # Wrapper uses the ML venv Python so the CLI inherits
-    # its third-party deps (fastapi, uvicorn).
+    # Wrapper uses the ML venv Python so the CLI inherits its
+    # third-party deps (fastapi, uvicorn - required by the
+    # dashboard and already pinned in ml/requirements.txt).
+    # Prevents ModuleNotFoundError on fresh installs where
+    # Homebrew's python3.11 has no extra packages. (Issue #17.)
     (bin/"immich-accelerator").write <<~SH
       #!/bin/bash
       VENV_PY="#{libexec}/ml/venv/bin/python3.11"
@@ -50,6 +53,8 @@ class ImmichAccelerator < Formula
   def post_install
     # ML venv in post_install avoids Homebrew dylib fixup on
     # Rust-compiled Python extensions (pydantic_core, tokenizers).
+    # The CLI wrapper also runs through this venv - its existence
+    # is load-bearing for every subcommand, not just ML.
     ml_dir = libexec/"ml"
     system Formula["python@3.11"].opt_bin/"python3.11", "-m", "venv", ml_dir/"venv"
     system ml_dir/"venv/bin/pip", "install", "-r", ml_dir/"requirements.txt"
@@ -70,6 +75,10 @@ class ImmichAccelerator < Formula
   end
 
   test do
+    # --version exits before lazy third-party imports load, so
+    # it's not enough on its own. Force-load the dashboard app
+    # so we catch ModuleNotFoundError on fastapi/uvicorn at
+    # brew audit / brew test time instead of in the wild.
     assert_match "immich-accelerator", shell_output("#{bin}/immich-accelerator --version")
     system "#{libexec}/ml/venv/bin/python3.11", "-c",
            "import sys; sys.path.insert(0, '#{libexec}'); " \
