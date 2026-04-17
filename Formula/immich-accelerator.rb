@@ -1,8 +1,8 @@
 class ImmichAccelerator < Formula
   desc "Run Immich compute natively on Apple Silicon"
   homepage "https://github.com/epheterson/immich-apple-silicon"
-  url "https://github.com/epheterson/immich-apple-silicon/archive/refs/tags/v1.4.5.tar.gz"
-  sha256 "abde7dd3b6f5473923d8ebe1cd94040a34085192e1fafe1631c29064fc3c8843"
+  url "https://github.com/epheterson/immich-apple-silicon/archive/refs/tags/v1.4.6.tar.gz"
+  sha256 "70b43fe0293c40e7abd178155bfc4d7ba0e208dd02b1b0510665396cb1fecabf"
   license "MIT"
 
   resource "ml" do
@@ -12,17 +12,23 @@ class ImmichAccelerator < Formula
 
   depends_on :macos
   depends_on arch: :arm64
-  # node@22 is the keg-only LTS that satisfies Immich's
-  # engines.node pin. The default `node` formula tracks
-  # mainline (currently 25.x) which breaks sharp's native
-  # addons with NODE_MODULE_VERSION mismatches.
+  # Immich 2.7.x pins engines.node = 24.x and sharp@0.34.5
+  # native addons break on node 25 (brew's default 
+  # formula). node@22 is the closest LTS with an arm64
+  # bottle that satisfies Immich's range. Pin explicitly —
+  # the accelerator's find_node() looks under
+  # /opt/homebrew/opt/node@22/bin/node.
   depends_on "node@22"
   depends_on "vips"
   depends_on "libpq"
   depends_on "python@3.11"
-  # GNU gzip for `gzip --rsyncable`. Apple's BSD gzip does
-  # not support that flag, and Immich's database-backup
-  # service pipes pg_dump stdout through it.
+  # GNU gzip for �. Apple's BSD gzip
+  # doesn't support that flag, and Immich's database-
+  # backup service pipes pg_dump stdout through it. Without
+  # GNU gzip the pg_dump_shim falls back to stripping
+  # --rsyncable (output is valid but loses rsync-friendly
+  # block boundaries) — installing it is the honest
+  # default that matches upstream Immich's behavior.
   depends_on "gzip"
 
   def install
@@ -31,7 +37,7 @@ class ImmichAccelerator < Formula
       (libexec/"ml").install Dir["*"]
     end
     # Wrapper uses the ML venv Python so the CLI inherits its
-    # third-party deps (fastapi, uvicorn - required by the
+    # third-party deps (fastapi, uvicorn — required by the
     # dashboard and already pinned in ml/requirements.txt).
     # Prevents ModuleNotFoundError on fresh installs where
     # Homebrew's python3.11 has no extra packages. (Issue #17.)
@@ -53,7 +59,7 @@ class ImmichAccelerator < Formula
   def post_install
     # ML venv in post_install avoids Homebrew dylib fixup on
     # Rust-compiled Python extensions (pydantic_core, tokenizers).
-    # The CLI wrapper also runs through this venv - its existence
+    # The CLI wrapper also runs through this venv — its existence
     # is load-bearing for every subcommand, not just ML.
     ml_dir = libexec/"ml"
     system Formula["python@3.11"].opt_bin/"python3.11", "-m", "venv", ml_dir/"venv"
