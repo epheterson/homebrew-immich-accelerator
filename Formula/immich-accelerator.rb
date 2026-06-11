@@ -1,8 +1,8 @@
 class ImmichAccelerator < Formula
   desc "Run Immich compute natively on Apple Silicon"
   homepage "https://github.com/epheterson/immich-apple-silicon"
-  url "https://github.com/epheterson/immich-apple-silicon/archive/refs/tags/v1.5.4.tar.gz"
-  sha256 "2eda61be878fb2f65285e0ba436c18a6c097c1d8f7ad602c21ac11b6a6ca0223"
+  url "https://github.com/epheterson/immich-apple-silicon/archive/refs/tags/v1.5.5.tar.gz"
+  sha256 "27a4126a15cba9b82905ad1eaf9a39a9b72a7a6b762bbacb19ad975257b72d30"
   license "MIT"
 
   resource "ml" do
@@ -64,6 +64,10 @@ class ImmichAccelerator < Formula
     <<~EOS
       To get started:
         immich-accelerator setup
+
+      Homebrew 5.1.15+ silently skips untrusted taps during upgrades.
+      So future releases reach you, run once:
+        brew trust epheterson/immich-accelerator
     EOS
   end
 
