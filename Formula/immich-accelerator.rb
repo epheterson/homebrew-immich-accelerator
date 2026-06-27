@@ -1,8 +1,8 @@
 class ImmichAccelerator < Formula
   desc "Run Immich compute natively on Apple Silicon"
   homepage "https://github.com/epheterson/immich-apple-silicon"
-  url "https://github.com/epheterson/immich-apple-silicon/archive/refs/tags/v1.5.20.tar.gz"
-  sha256 "e469bc000d7238b1c184b3c78c7b89a16a9182d4b50c95067ca88f5488c11004"
+  url "https://github.com/epheterson/immich-apple-silicon/archive/refs/tags/v1.5.21.tar.gz"
+  sha256 "5a5e97ba984774125244f43f802c52287abfed413b38f8db826ee8cba0c1dc04"
   license "MIT"
 
   resource "ml" do
@@ -44,6 +44,11 @@ class ImmichAccelerator < Formula
         echo "Fix with: brew reinstall immich-accelerator" >&2
         exit 1
       fi
+      # Don't write .pyc into the Cellar. Python would otherwise
+      # create __pycache__ next to the installed modules; if the CLI
+      # is ever run as root (sudo, or a root service) those files are
+      # root-owned and break "brew cleanup". (Issue #86.)
+      export PYTHONDONTWRITEBYTECODE=1
       export PYTHONPATH="#{libexec}:\$PYTHONPATH"
       cd "#{libexec}"
       exec "\$VENV_PY" -m immich_accelerator "\$@"
