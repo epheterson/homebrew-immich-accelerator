@@ -1,8 +1,8 @@
 class ImmichAccelerator < Formula
   desc "Run Immich compute natively on Apple Silicon"
   homepage "https://github.com/epheterson/immich-apple-silicon"
-  url "https://github.com/epheterson/immich-apple-silicon/archive/refs/tags/v1.5.31.tar.gz"
-  sha256 "3ec54d6a5b6020f723f9042d30876fc1107cd832f9f1aa3e9faad3f393a5270f"
+  url "https://github.com/epheterson/immich-apple-silicon/archive/refs/tags/v1.5.32.tar.gz"
+  sha256 "1ff01d8c68e03edd6263c06db6d2e4f43563e3aca37f632095af80f0c35bfef7"
   license "MIT"
 
   resource "ml" do
@@ -61,8 +61,39 @@ class ImmichAccelerator < Formula
     # The CLI wrapper also runs through this venv - its existence
     # is load-bearing for every subcommand, not just ML.
     ml_dir = libexec/"ml"
+    venv_py = ml_dir/"venv/bin/python3.11"
     system Formula["python@3.11"].opt_bin/"python3.11", "-m", "venv", ml_dir/"venv"
-    system ml_dir/"venv/bin/pip", "install", "-r", ml_dir/"requirements.txt"
+    # The ML deps are a large download (torch, pulled in by mlx_clip, is a
+    # few hundred MB), so a flaky connection is the common install failure
+    # (issues #17, #105). Retry once so a transient blip self-recovers; a
+    # deterministic failure still raises on the second try.
+    tries = 0
+    begin
+      tries += 1
+      system venv_py, "-m", "pip", "install", "-r", ml_dir/"requirements.txt"
+    rescue
+      retry if tries < 2
+      raise
+    end
+    # Fail the install LOUDLY if the venv still lacks what the CLI, dashboard
+    # and ML service need, instead of shipping a venv that exists but is
+    # missing deps and only errors at runtime with ModuleNotFoundError
+    # (issues #17, #105). system aborts on non-zero, so a broken install is
+    # visible and "brew reinstall immich-accelerator" fixes it.
+    verify_ml_venv venv_py
+  end
+
+  # Single source of truth for "the venv has what the CLI, dashboard and ML
+  # service need." Called at install time (to fail a broken install loudly)
+  # and from brew test. Imports the load-bearing packages and builds the
+  # dashboard app, so a partial pip install (missing fastapi/uvicorn, or a
+  # broken compiled mlx.core / torch via mlx_clip) is caught rather than
+  # crashing at runtime (#17, #105). NOTE: no backticks in this heredoc,
+  # they are command substitution and corrupt the generated formula. Uses
+  # import mlx.core, not bare import mlx (an empty namespace that imports
+  # even when the compiled extension is missing).
+  def verify_ml_venv(venv_py)
+    system venv_py, "-c", "import sys; sys.path.insert(0, '#{libexec}'); import fastapi, uvicorn; import mlx.core, mlx.nn; import mlx_clip; from immich_accelerator.dashboard import create_app; create_app({'version':'test','immich_url':'http://x','api_key':''})"
   end
 
   def caveats
@@ -89,9 +120,6 @@ class ImmichAccelerator < Formula
     # so we catch ModuleNotFoundError on fastapi/uvicorn at
     # brew audit / brew test time instead of in the wild.
     assert_match "immich-accelerator", shell_output("#{bin}/immich-accelerator --version")
-    system "#{libexec}/ml/venv/bin/python3.11", "-c",
-           "import sys; sys.path.insert(0, '#{libexec}'); " \
-           "from immich_accelerator.dashboard import create_app; " \
-           "create_app({'version':'test','immich_url':'http://x','api_key':''})"
+    verify_ml_venv "#{libexec}/ml/venv/bin/python3.11"
   end
 end
