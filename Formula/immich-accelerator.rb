@@ -1,13 +1,18 @@
 class ImmichAccelerator < Formula
   desc "Run Immich compute natively on Apple Silicon"
   homepage "https://github.com/epheterson/immich-apple-silicon"
-  url "https://github.com/epheterson/immich-apple-silicon/archive/refs/tags/v1.5.32.tar.gz"
-  sha256 "1ff01d8c68e03edd6263c06db6d2e4f43563e3aca37f632095af80f0c35bfef7"
+  url "https://github.com/epheterson/immich-apple-silicon/archive/refs/tags/v1.6.0.tar.gz"
+  sha256 "8e60a3dc1c59a017315fd02f29937eec04785675a23eea064bb62c87f2d600c3"
   license "MIT"
 
   resource "ml" do
     url "https://github.com/epheterson/immich-ml-metal/archive/eecfea2b20fb8cfefb722a599622b4d00d29852d.tar.gz"
     sha256 "6df935cc68eebb957adef59bdb5a8c2062afc874bca34b24f059d3009847ec31"
+  end
+
+  resource "native_ml" do
+    url "https://github.com/epheterson/immich-apple-silicon/releases/download/v1.6.0/immich-ml-native-1.6.0-macos-arm64.tar.gz"
+    sha256 "3d9cde62996fc2f4e639bbaa5270a82b9b7ab9c6ee72aabce2020a0cf4da034e"
   end
 
   depends_on :macos
@@ -29,6 +34,9 @@ class ImmichAccelerator < Formula
     libexec.install Dir["*"]
     resource("ml").stage do
       (libexec/"ml").install Dir["*"]
+    end
+    resource("native_ml").stage do
+      (libexec/"native-ml").install Dir["*"]
     end
     # Wrapper uses the ML venv Python so the CLI inherits its
     # third-party deps (fastapi, uvicorn - required by the
