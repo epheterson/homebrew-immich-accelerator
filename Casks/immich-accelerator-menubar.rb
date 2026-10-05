@@ -1,8 +1,8 @@
 cask "immich-accelerator-menubar" do
-  version "1.17.6"
-  sha256 "a5c329e386d1040c74b41e26051511c057c2f80e0594c510ef4a8708283697e9"
+  version "1.17.7"
+  sha256 "b1fc4b1a6b7b8fdb8bd48bdf9f147c4e5ec230f31ad16bd2a63a225789c89057"
 
-  url "https://github.com/epheterson/immich-apple-silicon/releases/download/v1.17.6/immich-accelerator-menubar-1.17.6.zip"
+  url "https://github.com/epheterson/immich-apple-silicon/releases/download/v1.17.7/immich-accelerator-menubar-1.17.7.zip"
   name "Immich Accelerator Menu Bar"
   desc "Menu-bar status and controls for Immich Accelerator"
   homepage "https://github.com/epheterson/immich-apple-silicon"
