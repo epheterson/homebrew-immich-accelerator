@@ -1,7 +1,5 @@
 # homebrew-immich-accelerator
 
-[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/epheterson/homebrew-immich-accelerator/badge)](https://scorecard.dev/viewer/?uri=github.com/epheterson/homebrew-immich-accelerator)
-
 Homebrew tap for [Immich Accelerator](https://github.com/epheterson/immich-apple-silicon), which runs Immich's compute natively on Apple Silicon.
 
 ```sh
