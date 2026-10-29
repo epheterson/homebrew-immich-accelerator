@@ -1,8 +1,8 @@
 class ImmichAccelerator < Formula
   desc "Run Immich compute natively on Apple Silicon"
   homepage "https://github.com/epheterson/immich-apple-silicon"
-  url "https://github.com/epheterson/immich-apple-silicon/archive/refs/tags/v1.17.13.tar.gz"
-  sha256 "2d1b5e966d962e4826f0b81d113717e664b87741f7e08e232787e4a771301c0d"
+  url "https://github.com/epheterson/immich-apple-silicon/archive/refs/tags/v1.18.0.tar.gz"
+  sha256 "06dde10c472b11f861dbd563fe9a21b69fd7dc4759107fc80c0ec9f274620212"
   license "MIT"
 
   resource "ml" do
@@ -11,8 +11,13 @@ class ImmichAccelerator < Formula
   end
 
   resource "native_ml" do
-    url "https://github.com/epheterson/immich-apple-silicon/releases/download/v1.17.13/immich-ml-native-1.17.13-macos-arm64.tar.gz"
-    sha256 "7622fa08d2e0e8f81c3f9f214d10a6434d214b2c58b9ca937606594245272a93"
+    url "https://github.com/epheterson/immich-apple-silicon/releases/download/v1.18.0/immich-ml-native-1.18.0-macos-arm64.tar.gz"
+    sha256 "8d441a68065ec85984e6657d0dccd23eb7420bd8da375c7442408406b80a2f8e"
+  end
+
+  resource "service_launcher" do
+    url "https://github.com/epheterson/immich-apple-silicon/releases/download/v1.18.0/immich-accelerator-service-1.18.0.tar.gz"
+    sha256 "80ca858d0c037aba56798ef10f155d8cb7e7084142f55d2ec8be5d9bbd6c4272"
   end
 
   depends_on :macos
@@ -37,6 +42,9 @@ class ImmichAccelerator < Formula
     end
     resource("native_ml").stage do
       (libexec/"native-ml").install Dir["*"]
+    end
+    resource("service_launcher").stage do
+      libexec.install Dir["*"]
     end
     # Wrapper uses the ML venv Python so the CLI inherits its
     # third-party deps (fastapi, uvicorn - required by the
@@ -116,7 +124,7 @@ class ImmichAccelerator < Formula
   end
 
   service do
-    run [bin/"immich-accelerator", "watch"]
+    run opt_libexec/"Immich Accelerator Service.app/Contents/MacOS/immich-accelerator-service"
     keep_alive true
     log_path var/"log/immich-accelerator.log"
     error_log_path var/"log/immich-accelerator-error.log"
